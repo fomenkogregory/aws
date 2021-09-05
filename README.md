@@ -1,0 +1,1 @@
+### AWS backend for [shop project](https://github.com/fomenkogregory/shop-angular-cloudfront)
