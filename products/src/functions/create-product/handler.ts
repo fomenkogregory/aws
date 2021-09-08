@@ -1,22 +1,23 @@
 import 'source-map-support/register';
 
-import { Client } from 'pg'
+import { Client } from "pg";
 import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway';
 import { formatJSONResponse } from '@libs/apiGateway';
 import { middyfy } from '@libs/lambda';
 import { clientConfig } from "@libs/client-config";
+import { schema } from "./schema";
 import { Queries } from "@shared/queries";
 import { Logger } from "@shared/logger";
 
-const getProductsList: ValidatedEventAPIGatewayProxyEvent = async (event) => {
+const createProduct: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
   Logger.logEvent(event)
   const client = new Client(clientConfig)
 
   try {
     await client.connect()
-    const { rows: products } = await client.query(Queries.selectAll)
+    const { rows: products } = await client.query(Queries.create(event.body))
 
-    return formatJSONResponse(products);
+    return formatJSONResponse(products[0]);
   } catch (error) {
     return formatJSONResponse(error, 500);
   } finally {
@@ -24,4 +25,4 @@ const getProductsList: ValidatedEventAPIGatewayProxyEvent = async (event) => {
   }
 }
 
-export const main = middyfy(getProductsList);
+export const main = middyfy(createProduct);
