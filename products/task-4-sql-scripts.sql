@@ -1,3 +1,5 @@
+-- FIRST
+
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS products(
@@ -22,6 +24,8 @@ INSERT INTO products (title, description, price) VALUES
 ('Green', 'Green color', 9),
 ('Pink', 'Pink color', 17);
 
+-- SECOND
+
 INSERT INTO stocks (product_id, count) VALUES
 ('6c6f518f-6399-489b-8f6a-3465fbfeba53', 15),
 ('81625810-bdda-4e19-b9ba-816f9307c3dd', 15),
@@ -30,5 +34,3 @@ INSERT INTO stocks (product_id, count) VALUES
 ('c9915cbd-6f17-4185-8a24-747e57872c2f', 15),
 ('e122a5ab-61dc-41ad-a7c3-c3f65a3d5bdb', 15),
 ('e9cc921c-7f08-4279-bc91-f073a9946fb9', 15);
-
-SELECT id, title, description, price, count FROM products p LEFT JOIN stocks s ON p.id = s.product_id
