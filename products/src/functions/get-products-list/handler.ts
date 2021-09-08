@@ -6,8 +6,10 @@ import { formatJSONResponse } from '@libs/apiGateway';
 import { middyfy } from '@libs/lambda';
 import { clientConfig } from "@libs/client-config";
 import { Queries } from "@shared/queries";
+import { Logger } from "@shared/logger";
 
-const getProductsList: ValidatedEventAPIGatewayProxyEvent = async () => {
+const getProductsList: ValidatedEventAPIGatewayProxyEvent = async (event) => {
+  Logger.logEvent(event)
   const client = new Client(clientConfig)
 
   try {
@@ -15,8 +17,8 @@ const getProductsList: ValidatedEventAPIGatewayProxyEvent = async () => {
     const { rows: products } = await client.query(Queries.selectAll)
 
     return formatJSONResponse(products);
-  } catch {
-    console.table('KEK')
+  } catch (error) {
+    return formatJSONResponse(error, 500);
   } finally {
     await client.end()
   }

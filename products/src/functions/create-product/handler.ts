@@ -7,8 +7,10 @@ import { middyfy } from '@libs/lambda';
 import { clientConfig } from "@libs/client-config";
 import { schema } from "./schema";
 import { Queries } from "@shared/queries";
+import { Logger } from "@shared/logger";
 
 const createProduct: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
+  Logger.logEvent(event)
   const client = new Client(clientConfig)
 
   try {
@@ -16,8 +18,8 @@ const createProduct: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (
     const { rows: products } = await client.query(Queries.create(event.body))
 
     return formatJSONResponse(products[0]);
-  } catch {
-    console.table('KEK')
+  } catch (error) {
+    return formatJSONResponse(error, 500);
   } finally {
     await client.end()
   }
