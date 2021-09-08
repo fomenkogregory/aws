@@ -5,16 +5,17 @@ import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway';
 import { formatJSONResponse } from '@libs/apiGateway';
 import { middyfy } from '@libs/lambda';
 import { clientConfig } from "@libs/client-config";
+import { schema } from "./schema";
 import { Queries } from "@shared/queries";
 
-const getProductsList: ValidatedEventAPIGatewayProxyEvent = async (event) => {
+const createProduct: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
   const client = new Client(clientConfig)
 
   try {
     await client.connect()
-    const { rows: product } = await client.query(Queries.selectById(event.pathParameters.id))
+    const { rows: products } = await client.query(Queries.create(event.body))
 
-    return formatJSONResponse(product);
+    return formatJSONResponse(products[0]);
   } catch {
     console.table('KEK')
   } finally {
@@ -22,4 +23,4 @@ const getProductsList: ValidatedEventAPIGatewayProxyEvent = async (event) => {
   }
 }
 
-export const main = middyfy(getProductsList);
+export const main = middyfy(createProduct);
