@@ -7,21 +7,33 @@ import { middyfy } from '@libs/lambda';
 import { clientConfig } from "@libs/client-config";
 import { Queries } from "@shared/queries";
 import { Logger } from "@shared/logger";
+import { BadRequestError, InternalServerError, NotFoundError, RegExpression } from '@core/models';
 
-const getProductsList: ValidatedEventAPIGatewayProxyEvent = async (event) => {
+const getProductById: ValidatedEventAPIGatewayProxyEvent = async (event) => {
   Logger.logEvent(event)
+
   const client = new Client(clientConfig)
+  const { id } = event.pathParameters
 
   try {
     await client.connect()
-    const { rows: product } = await client.query(Queries.selectById(event.pathParameters.id))
 
-    return formatJSONResponse(product);
-  } catch (error) {
-    return formatJSONResponse(error, 500);
+    if (!RegExpression.uuid4.test(id)) {
+      return formatJSONResponse(new BadRequestError('Incorrect id.'));
+    }
+
+    const { rows: product } = await client.query(Queries.selectById(id))
+
+    if (!product[0]) {
+      return formatJSONResponse(new NotFoundError('Product', id));
+    }
+
+    return formatJSONResponse(product[0]);
+  } catch {
+    return formatJSONResponse(new InternalServerError());
   } finally {
     await client.end()
   }
 }
 
-export const main = middyfy(getProductsList);
+export const main = middyfy(getProductById);

@@ -8,6 +8,7 @@ import { clientConfig } from "@libs/client-config";
 import { schema } from "./schema";
 import { Queries } from "@shared/queries";
 import { Logger } from "@shared/logger";
+import { InternalServerError } from "@core/models";
 
 const createProduct: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
   Logger.logEvent(event)
@@ -18,8 +19,8 @@ const createProduct: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (
     const { rows: products } = await client.query(Queries.create(event.body))
 
     return formatJSONResponse(products[0]);
-  } catch (error) {
-    return formatJSONResponse(error, 500);
+  } catch {
+    return formatJSONResponse(new InternalServerError());
   } finally {
     await client.end()
   }

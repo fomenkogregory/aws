@@ -7,6 +7,7 @@ import { middyfy } from '@libs/lambda';
 import { clientConfig } from "@libs/client-config";
 import { Queries } from "@shared/queries";
 import { Logger } from "@shared/logger";
+import { InternalServerError } from "@core/models";
 
 const getProductsList: ValidatedEventAPIGatewayProxyEvent = async (event) => {
   Logger.logEvent(event)
@@ -17,8 +18,8 @@ const getProductsList: ValidatedEventAPIGatewayProxyEvent = async (event) => {
     const { rows: products } = await client.query(Queries.selectAll)
 
     return formatJSONResponse(products);
-  } catch (error) {
-    return formatJSONResponse(error, 500);
+  } catch {
+    return formatJSONResponse(new InternalServerError());
   } finally {
     await client.end()
   }
