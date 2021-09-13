@@ -1,10 +1,26 @@
 import { BaseRepository } from "@core/repository";
+import { TransactionCommand } from "@core/models";
 import { ProductDto } from "@models/product-dto";
 
 export class ProductsRepository extends BaseRepository<ProductDto> {
   public async create({ title, description, price }: Omit<ProductDto, 'id' | 'count'>): Promise<ProductDto> {
-    const result = await this.client.query(`INSERT INTO products (title, description, price) VALUES ('${title}', '${description}', ${price}) RETURNING *`)
-    return result.rows[0];
+    try {
+      await this.client.query(TransactionCommand.Begin)
+
+      const products = await this.client.query(`INSERT INTO products (title, description, price) VALUES ('${title}', '${description}', ${price}) RETURNING id`)
+      const { id } = products.rows[0]
+
+      await this.client.query(`INSERT INTO stocks (product_id, count) VALUES ('${id}', 1)`)
+
+      const result = await this.findOne(id)
+
+      await this.client.query(TransactionCommand.Commit)
+
+      return result;
+    } catch (error) {
+      await this.client.query(TransactionCommand.Rollback)
+      throw error
+    }
   }
 
   public async delete(_id: string): Promise<void> {
