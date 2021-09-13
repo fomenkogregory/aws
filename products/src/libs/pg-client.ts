@@ -1,4 +1,4 @@
-import { ClientConfig } from "pg";
+import { Client, ClientConfig } from "pg";
 
 const {
   PG_HOST,
@@ -8,7 +8,7 @@ const {
   PG_PASSWORD,
 } = process.env
 
-export const clientConfig: ClientConfig = {
+const clientConfig: ClientConfig = {
   host: PG_HOST,
   port: +PG_PORT,
   database: PG_DATABASE,
@@ -18,4 +18,10 @@ export const clientConfig: ClientConfig = {
     rejectUnauthorized: false
   },
   connectionTimeoutMillis: 5000
+}
+
+export class PgClient extends Client {
+  constructor() {
+    super(clientConfig);
+  }
 }
