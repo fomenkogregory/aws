@@ -1,21 +1,22 @@
 import 'source-map-support/register';
 
-import { Client } from 'pg'
 import type { ValidatedEventAPIGatewayProxyEvent } from '@libs/apiGateway';
 import { formatJSONResponse } from '@libs/apiGateway';
 import { middyfy } from '@libs/lambda';
-import { clientConfig } from "@libs/client-config";
-import { Queries } from "@shared/queries";
+import { PgClient } from "@libs/pg-client";
 import { Logger } from "@shared/logger";
 import { InternalServerError } from "@core/models";
+import { ProductsRepository } from "@shared/products-repository";
 
 const getProductsList: ValidatedEventAPIGatewayProxyEvent = async (event) => {
   Logger.logEvent(event)
-  const client = new Client(clientConfig)
+
+  const client = new PgClient()
+  const repository = new ProductsRepository(client)
 
   try {
     await client.connect()
-    const { rows: products } = await client.query(Queries.selectAll)
+    const products = await repository.find()
 
     return formatJSONResponse(products);
   } catch {

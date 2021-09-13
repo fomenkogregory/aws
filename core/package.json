@@ -1,0 +1,15 @@
+{
+  "name": "core",
+  "version": "1.0.0",
+  "description": "Core module",
+  "main": "index.ts",
+  "dependencies": {
+    "@types/pg": "^8.6.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Greg",
+  "license": "ISC"
+}
